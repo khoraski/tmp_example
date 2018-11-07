@@ -1,0 +1,124 @@
+<html>
+	<head>
+		<script>
+			const size = 64;
+			var circles = new Array(0);
+			var squares = new Array(0);
+			var saveOrLoad = "";
+			var url = window.location.href;
+
+			//An action has occurred.
+			if (url.replace("action", "") != url) {
+				//Get the status of the action.
+				var status = unescape(url.split("status=")[1].split("&action")[0]);
+				//It was a loading action.
+				if (url.split("action=")[1] == "load") {
+					//Check if the action succeeded.
+					if (status == "failure") {
+						alert("Cannot load this name.");
+					} else {
+						//Load shapes.
+						circles = JSON.parse(status.split("|")[0]);
+						squares = JSON.parse(status.split("|")[1]);
+					}
+				//It was a saving action.
+				} else {
+					//Check if the action succeeded.
+					if (status == "failure") {
+						alert("Cannot save this name.");
+					} else {
+						console.log("Success.");
+					}
+				}
+			}
+
+
+			//Draw a circle.
+			function drawCircle(x, y, ctx) {
+				ctx.fillStyle = "blue";
+				ctx.beginPath();
+				ctx.arc(x, y, size / 2, 0, Math.PI * 2); 
+				ctx.fill();
+			}
+
+			//Draw a square.
+			function drawSquare(x, y, ctx) {
+				ctx.fillStyle = "red";
+				ctx.fillRect(x - size/2, y - size/2, size, size);
+			}
+
+			window.onload = function() {
+				var canvas = document.getElementById("canvas");
+				var ctx = canvas.getContext("2d");
+
+				//Make the canvas black.
+				ctx.fillStyle = "black";
+				ctx.fillRect(0,0,1000,1000);
+
+				//Draw any initial squares or circles...
+				for (var i = 0; i < circles.length; i++) {
+					drawCircle(circles[i]['x'], circles[i]['y'], ctx);
+				}
+				for (var i = 0; i < squares.length; i++) {
+					drawSquare(squares[i]['x'], squares[i]['y'], ctx);
+				}
+
+				//Disable that pesky context menu.
+				document.body.oncontextmenu = () => {
+					return false;
+				};
+
+				canvas.onmouseup = (e) => {
+					var x = e.clientX - canvas.getBoundingClientRect().left;
+					var y = e.clientY - canvas.getBoundingClientRect().top;
+					switch (e.button) {
+						case 0:
+							circles.push({ x, y });
+							drawCircle(x, y, ctx);
+							break;
+						case 2:
+							squares.push({ x, y });
+							drawSquare(x, y, ctx);
+							break;
+					}
+				}
+
+				document.getElementById("btnSave").onclick = () => {
+					saveOrLoad = "save";
+				}
+				document.getElementById("btnLoad").onclick = () => {
+					saveOrLoad = "load";
+				}
+
+				document.getElementById("mainForm").onsubmit = () => {
+					if (saveOrLoad == "load") {
+						document.getElementById("txtData").value = "LOAD";
+					} else {
+						var data = JSON.stringify(circles) + "|" + JSON.stringify(squares);
+						document.getElementById("txtData").value = data;
+					}
+				};
+			}
+		</script>
+	</head>
+	<body>
+		<table>
+			<tr>
+				<td>
+					<canvas width=640 height=480 id="canvas"></canvas>
+				</td>
+				<td>
+					<form id="mainForm" method="post">
+						<label for="name">Project Name:</label>
+						<br>
+						<input name="name" id="txtName" type="text" />
+						<input name="data" id="txtData" type="text" style="display:none" />
+						<br>
+						<input type="submit" id="btnSave" value="SAVE" />
+						<input type="submit" id="btnLoad" value="LOAD" />
+					</form>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>
