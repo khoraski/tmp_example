@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<script src="/js/euclid.js"></script>
+		<script>
+			
+			//This occurs after the window has finished loading.
+			window.onload = function() {
+
+				//Notice that this is the same ID as the form.
+				var projectForm = euclid_form("projectForm");
+
+				//Queries to the database consist of a name, an
+				//	action, and data. Queries are sent when the
+				//	user presses the submit button a form. Our
+				//	form only has a "name" field visible to the
+				//	user, so we need	to specify here what will
+				//	be stored in the other two fields.
+
+				//This function occurs right before a query is sent.
+				projectForm.onquery = function() {
+
+					//This is a loading action so action = load.
+					projectForm.setField("action", "load");
+
+					//Data currently doesn't do anything to just
+					//	make it empty.
+					projectForm.setField("data", "");
+
+				}
+
+				//After a query is made to the database, the server
+				//	responds with a response query. Response queries
+				//	contain a name, an action, data, as well as a 
+				//	status.
+
+				//Check if there is a response query.
+				if (euclid_has_response()) {
+					//Check if the loading action was successful.
+					if (euclid_response("status") == "success") {
+						//Load the project text into the project text box.
+						document.getElementById("projectText").value = euclid_response("data");
+					} else {
+						//Display error message on failure.
+						alert(euclid_response("data"));
+					}
+				}
+
+			}
+
+		</script>
+	</head>
+	<body>
+		<p>
+			This is a server test page.
+			<br>
+			Type the name of a project and press "LOAD".
+			<br>
+			The project will load into the text area.
+		</p>
+		<form id="projectForm">
+			<label for="name">Project Name</label>
+			<br>
+			<input name="name" type="text" />
+			<input type="submit" id="btnLoad" value="LOAD" />
+		</form>
+		<p>Project Text<br></p>
+		<textarea id="projectText"></textarea>
+	</body>
+
+</html>

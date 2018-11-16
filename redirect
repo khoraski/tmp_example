@@ -1,0 +1,28 @@
+<html>
+	<!--
+		This page redirection the user either to...
+			A. The location stored in the "redirect" cookie, or
+			B. The home page, if said cookie does not exist.
+	-->
+	<body>
+		<script>
+			//Check if redirect cookie exists.
+			if (document.cookie.replace("redirect=", "") != document.cookie) {
+				//Fetch the hex URL from the redirect cookie.
+				var url16 = document.cookie.split("redirect=")[1].split(";")[0];
+				//Convert the hex URL into ASCII.
+				var url = "";
+				for (var i = 0; i < url16.length; i += 2) {
+					var b = parseInt(url16.substr(i, 2), 16);
+					url += String.fromCharCode(b);					
+				}
+				//Redirect to the URL.
+				window.location.href = url + "<GET_REQUEST>";
+			} else {
+				//Redirect to the homepage.
+				window.location.href = "/";
+			}
+		</script>
+	</body>
+
+</html>
